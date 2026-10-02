@@ -1,0 +1,316 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#6542d8">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>StageMate · Rapunzel</title>
+<style>
+:root{--purple:#6542d8;--ink:#1f2450;--muted:#6f7397;--bg:#f7f5ff;--card:#fff;--green:#30b86b;--blue:#4b8df8;--pink:#f38bb0;--yellow:#f5b93e}
+*{box-sizing:border-box} body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;background:var(--bg);color:var(--ink)} button,select{font:inherit} .app{max-width:520px;margin:auto;min-height:100vh;background:linear-gradient(#fbfaff,#f5f3ff)}
+header{padding:18px 20px 12px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:rgba(250,249,255,.94);backdrop-filter:blur(16px);z-index:5}
+.brand{display:flex;gap:10px;align-items:center} .logo{width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,#5b2bd3,#ec6a9d);color:white;display:grid;place-items:center;font-size:24px;box-shadow:0 7px 20px #6843d633} h1{font-size:21px;margin:0} .small{font-size:12px;color:var(--muted)} main{padding:10px 18px 100px}
+.hero{background:linear-gradient(135deg,#5d38ce,#7d55e9);color:#fff;border-radius:28px;padding:22px;margin:6px 0 18px;box-shadow:0 15px 35px #6542d833} .hero h2{margin:0 0 5px;font-size:28px} .hero p{margin:0;opacity:.88}
+.card{background:var(--card);border:1px solid #e9e6f8;border-radius:22px;padding:16px;margin:12px 0;box-shadow:0 7px 24px #30226a0c}
+.label{font-weight:700;margin-bottom:9px} select{width:100%;padding:14px;border-radius:14px;border:1px solid #ddd8f3;background:#fff;color:var(--ink)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px} .role{border:1px solid #e4e0f5;border-radius:16px;padding:12px;background:#fff;text-align:left;cursor:pointer} .role.active{border:2px solid var(--purple);background:#f5f0ff} .role b{display:block} .role span{font-size:12px;color:var(--muted)}
+.primary{width:100%;border:0;border-radius:16px;background:var(--purple);color:white;padding:15px;font-weight:800;box-shadow:0 9px 22px #6542d844;cursor:pointer} .secondary{border:1px solid #ddd8f3;border-radius:14px;background:white;padding:12px 14px;color:var(--ink);cursor:pointer}
+.sceneTitle{font-size:14px;font-weight:800;color:var(--muted);margin-bottom:10px} .progress{height:7px;background:#e8e4f6;border-radius:99px;overflow:hidden} .bar{height:100%;background:linear-gradient(90deg,#6542d8,#b06bea);width:0}
+.bubble{padding:15px;border-radius:19px;margin:10px 0;max-width:90%} .ai{background:#fff;border:1px solid #e7e3f4} .you{background:#e9faee;margin-left:auto;border:1px solid #d4f1dd} .speaker{font-size:12px;font-weight:800;margin-bottom:5px;color:#6653a7} .translation{color:#8589a8;font-size:13px;margin-top:6px}
+.mic{width:86px;height:86px;border-radius:50%;border:0;background:var(--purple);color:#fff;font-size:36px;display:block;margin:15px auto;box-shadow:0 12px 28px #6542d855;cursor:pointer} .mic.listening{background:#e7557c;animation:pulse 1s infinite} @keyframes pulse{50%{transform:scale(1.06)}}
+.modes button{width:100%;text-align:left;border:0;border-radius:18px;padding:16px;margin:6px 0;cursor:pointer} .learning{background:#e4f6e8} .practice{background:#e6f0ff} .rehearsal{background:#fff2d8} .performance{background:#ffe7f0}
+.score{font-size:52px;font-weight:900;text-align:center;color:var(--purple)} .meter{height:14px;background:#ece8f8;border-radius:99px;overflow:hidden} .meter div{height:100%;background:linear-gradient(90deg,#40bf7b,#6542d8);width:0}
+.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(520px,100%);background:#fff;border-top:1px solid #e8e4f5;display:flex;justify-content:space-around;padding:10px 8px calc(10px + env(safe-area-inset-bottom));z-index:10} .nav button{border:0;background:transparent;color:#777;font-size:11px} .nav .active{color:var(--purple);font-weight:800}
+.hidden{display:none!important} .toprow{display:flex;align-items:center;justify-content:space-between} .back{border:0;background:transparent;font-size:22px;cursor:pointer} .hint{font-size:12px;color:var(--muted);line-height:1.5}
+
+.turnBadge{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;background:#efeaff;color:#6542d8;font-size:12px;font-weight:800;margin:8px 0 2px}
+.aiAvatar,.youAvatar{width:34px;height:34px;border-radius:50%;display:inline-grid;place-items:center;margin-right:8px;vertical-align:middle}
+.aiAvatar{background:#eee9ff}.youAvatar{background:#e5f8ea}
+.lineText{font-size:17px;line-height:1.45;font-weight:600}
+.translation{display:block;color:#8a8da9;font-size:11px;line-height:1.4;margin-top:5px;font-weight:400}
+.you .lineText{color:#173c25}
+.ai .lineText{color:#25243c}
+
+.selectedRole{display:inline-flex;align-items:center;margin:10px 0 2px;padding:7px 11px;border-radius:999px;background:#efeaff;color:#6542d8;font-size:12px;font-weight:800}
+.role b{font-size:14px}.role span{display:block;margin-top:3px}
+</style>
+</head>
+<body>
+<div class="app">
+<header><div class="brand"><div class="logo">🎭</div><div><h1>StageMate</h1><div class="small">Your AI Acting Partner</div></div></div><button class="secondary" onclick="speakCurrent()" title="Read aloud">🔊</button></header>
+<main>
+<section id="home">
+<div class="hero"><h2>Let's make the stage yours! ✨</h2><p>用對話的方式，練習英文舞台劇台詞</p></div>
+<div class="card"><div class="label">Choose a Play · 選擇劇本</div><div style="font-size:18px;font-weight:800">Rapunzel · 長髮公主</div><div class="small">4 Acts · 11 Scenes · Full script built in</div></div>
+<div class="card">
+<div class="label">Choose Where to Practice · 選擇練習位置</div>
+<div style="display:grid;gap:10px">
+<select id="actSelect" onchange="updateSceneOptions()"></select>
+<select id="sceneSelect"></select>
+</div>
+<div class="hint" style="margin-top:8px">可以直接選擇 Act 和 Scene，不需要每次從頭開始。</div>
+</div>
+<div class="card"><div class="label">Assign Your Role · 分配角色</div><div class="hint" style="margin-bottom:10px">15 個孩子各自選擇一個獨立角色。Rapunzel 1 / 2、Prince 1 / 2、Narrator 1–5 都是不同孩子。</div><div id="roles" class="grid"></div></div>
+<button class="primary" onclick="startPractice()">Start Practicing · 開始練習</button>
+</section>
+
+<section id="practice" class="hidden">
+<div class="toprow"><button class="back" onclick="show('home')">‹</button><div id="sceneTitle" class="sceneTitle"></div><button class="secondary" onclick="show('modes')">⚙️</button></div>
+<div class="card" style="padding:12px;margin-bottom:10px"><div class="label">Jump to Act / Scene · 直接選擇</div><div style="display:grid;grid-template-columns:1fr 1.8fr;gap:8px"><select id="practiceActSelect" onchange="updatePracticeSceneOptions()"></select><select id="practiceSceneSelect" onchange="changePracticeScene()"></select></div></div>
+<div class="progress"><div id="bar" class="bar"></div></div>
+<div class="selectedRole">🎭 <span id="selectedRole">You are · —</span></div>
+<div id="dialogue"></div>
+<div class="card" style="text-align:center">
+<div id="turnHint" class="hint">輪到 AI 對手。聽完後，說出你的台詞。</div>
+<button id="mic" class="mic" onclick="toggleListen()">🎙️</button>
+<div id="micText" class="hint">Tap to speak</div>
+<div style="display:flex;gap:8px;justify-content:center"><button class="secondary" onclick="repeatAI()">▶ Replay AI</button><button class="secondary" onclick="nextLine()">Next →</button></div>
+</div>
+</section>
+
+<section id="modes" class="hidden">
+<div class="toprow"><button class="back" onclick="show('practice')">‹</button><div class="sceneTitle">Practice Mode</div><span></span></div>
+<div class="modes">
+<button class="learning" onclick="setMode('learning')"><b>1 · Learning 學習模式</b><br><span class="small">顯示你的台詞和中文翻譯，跟著練習</span></button>
+<button class="practice" onclick="setMode('practice')"><b>2 · Practice 練習模式</b><br><span class="small">只顯示提示，需要自己說出台詞</span></button>
+<button class="rehearsal" onclick="setMode('rehearsal')"><b>3 · Rehearsal 排練模式</b><br><span class="small">不顯示台詞，完整對戲像真正的排練</span></button>
+<button class="performance" onclick="setMode('performance')"><b>4 · Performance 表演模式</b><br><span class="small">連續進行，最後給表現評分</span></button>
+</div>
+</section>
+
+<section id="report" class="hidden">
+<div class="toprow"><button class="back" onclick="show('practice')">‹</button><div class="sceneTitle">Performance Report</div><span></span></div>
+<div class="card"><div class="score" id="score">92%</div><div style="text-align:center;font-weight:800">Excellent!</div><p class="hint" style="text-align:center">Keep going! You're doing great!</p></div>
+<div class="card"><b>Lines remembered · 台詞記憶</b><div class="meter"><div id="m1"></div></div><p id="p1">0%</p></div>
+<div class="card"><b>Pronunciation · 發音</b><div class="meter"><div id="m2"></div></div><p id="p2">0%</p></div>
+<div class="card"><b>Fluency · 流暢度</b><div class="meter"><div id="m3"></div></div><p id="p3">0%</p></div>
+<button class="primary" onclick="startPractice()">Try Again</button>
+</section>
+</main>
+<nav class="nav"><button class="active" onclick="show('home')">⌂<br>Home</button><button onclick="show('home')">▤<br>Library</button><button onclick="show('practice')">🎙️<br>Practice</button><button onclick="show('report')">☆<br>Report</button></nav>
+</div>
+<script>
+const DATA = {"title": "Rapunzel", "subtitle": "StageMate · Your AI Acting Partner", "roles": ["Rapunzel 1", "Rapunzel 2", "Prince 1", "Prince 2", "Enchantress", "King", "Man", "Woman", "Villager", "Servant", "Narrator 1", "Narrator 2", "Narrator 3", "Narrator 4", "Narrator 5"], "script": [{"act": "Act 1", "scene": "Scene 1: The Lost Princess", "lines": [{"speaker": "Narrator 1", "text": "Long ago, a king and queen had a daughter named Rapunzel. Before she was born, the queen became seriously ill."}, {"speaker": "Narrator 2", "text": "Nearby, there was a magical golden flower. It had the power to heal people and keep them young."}, {"speaker": "King", "text": "Please, find that flower. We will do anything to save the queen and our child."}, {"speaker": "Man", "text": "Your Majesty, the flower has been found!"}, {"speaker": "Woman", "text": "The queen is getting better!"}, {"speaker": "Narrator 3", "text": "The magic of the flower saved the queen. But when Rapunzel was born, its magic passed into her golden hair."}, {"speaker": "King", "text": "Our daughter is healthy. We are so lucky."}, {"speaker": "Woman", "text": "Look at her hair. It almost seems to glow."}, {"speaker": "Narrator 4", "text": "But someone else had noticed the magic."}, {"speaker": "Enchantress", "text": "That child has the power of the flower. If I can use her hair, I can stay young forever."}, {"speaker": "Narrator 5", "text": "That night, the Enchantress entered the palace and took the baby away."}, {"speaker": "King", "text": "Rapunzel! Where is my daughter?"}, {"speaker": "Servant", "text": "Your Majesty, we have searched everywhere. She is gone."}, {"speaker": "King", "text": "Find her. We cannot give up."}, {"speaker": "Narrator 1", "text": "The kingdom searched for years, but Rapunzel was never found."}]}, {"act": "Act 1", "scene": "Scene 2: The Tower", "lines": [{"speaker": "Narrator 2", "text": "Rapunzel grew up in a tall tower hidden deep in the forest. She had never seen the outside world."}, {"speaker": "Rapunzel 1", "text": "Every year, on my birthday, those lights appear in the sky. I don't know what they are, but I want to see them for myself."}, {"speaker": "Enchantress", "text": "Rapunzel, you are not leaving this tower."}, {"speaker": "Rapunzel 1", "text": "Why not?"}, {"speaker": "Enchantress", "text": "The outside world is dangerous. You are safer here with me."}, {"speaker": "Rapunzel 1", "text": "You always say that. I can take care of myself."}, {"speaker": "Enchantress", "text": "You have no idea what is out there."}, {"speaker": "Narrator 3", "text": "The Enchantress visited Rapunzel regularly. She used Rapunzel's magical hair to keep herself young."}, {"speaker": "Enchantress", "text": "Rapunzel, let down your hair."}, {"speaker": "Rapunzel 1", "text": "Coming!"}, {"speaker": "Narrator 4", "text": "Rapunzel's long hair reached all the way to the ground, allowing the Enchantress to climb into the tower."}, {"speaker": "Rapunzel 1", "text": "I really want to see the lanterns this year."}, {"speaker": "Enchantress", "text": "Forget the lanterns. Stay here."}, {"speaker": "Rapunzel 1", "text": "I won't be a child forever."}, {"speaker": "Narrator 5", "text": "But Rapunzel's wish was about to come true in a way she never expected."}]}, {"act": "Act 1", "scene": "Scene 3: The Prince Arrives", "lines": [{"speaker": "Narrator 1", "text": "Not far away, a young prince was running from the palace."}, {"speaker": "Prince 1", "text": "I may have borrowed something from the palace without permission, but I had a very good reason."}, {"speaker": "Narrator 2", "text": "His reason was not particularly convincing. Still, he needed somewhere to hide."}, {"speaker": "Prince 1", "text": "That tower will do."}, {"speaker": "Narrator 3", "text": "He climbed the tower and entered through the window."}, {"speaker": "Rapunzel 1", "text": "Who are you?!"}, {"speaker": "Prince 1", "text": "Please don't scream."}, {"speaker": "Rapunzel 1", "text": "You broke into my home!"}, {"speaker": "Prince 1", "text": "Technically, I climbed into your home."}, {"speaker": "Rapunzel 1", "text": "That is not better."}, {"speaker": "Prince 1", "text": "Fair point."}, {"speaker": "Narrator 4", "text": "Rapunzel noticed that he was carrying something."}, {"speaker": "Rapunzel 1", "text": "What's that?"}, {"speaker": "Prince 1", "text": "Nothing."}, {"speaker": "Rapunzel 1", "text": "You are terrible at lying."}, {"speaker": "Prince 1", "text": "I need somewhere to hide, and you need someone to take you to the lantern festival."}, {"speaker": "Rapunzel 1", "text": "How do you know about the festival?"}, {"speaker": "Prince 1", "text": "Everyone knows about it."}, {"speaker": "Rapunzel 1", "text": "Then take me."}, {"speaker": "Prince 1", "text": "And what do I get?"}, {"speaker": "Rapunzel 1", "text": "You get your stolen item back. I hid it."}, {"speaker": "Prince 1", "text": "You what?"}, {"speaker": "Rapunzel 1", "text": "Take me to the lanterns, and I'll return it."}, {"speaker": "Prince 1", "text": "Deal."}, {"speaker": "Narrator 5", "text": "For the first time, Rapunzel was going to leave the tower."}]}, {"act": "Act 2", "scene": "Scene 1: Leaving the Tower", "lines": [{"speaker": "Narrator 1", "text": "The next morning, Rapunzel prepared to leave."}, {"speaker": "Rapunzel 2", "text": "I'm leaving. I'm actually leaving."}, {"speaker": "Prince 2", "text": "You have said that about ten times."}, {"speaker": "Rapunzel 2", "text": "Because I'm excited."}, {"speaker": "Prince 2", "text": "I noticed."}, {"speaker": "Narrator 2", "text": "Rapunzel looked back at the tower."}, {"speaker": "Rapunzel 2", "text": "I have spent my whole life here. Part of me is scared."}, {"speaker": "Prince 2", "text": "That's normal."}, {"speaker": "Rapunzel 2", "text": "And the other part of me wants to run into the forest screaming."}, {"speaker": "Prince 2", "text": "That sounds less normal."}, {"speaker": "Rapunzel 2", "text": "Let's go."}]}, {"act": "Act 2", "scene": "Scene 2: The Hair Ladder", "lines": [{"speaker": "Narrator 1", "text": "The Prince realized Rapunzel's hair was the ladder."}, {"speaker": "Prince 2", "text": "If she can pull up the Enchantress, perhaps she can pull me up as well."}, {"speaker": "Narrator 2", "text": "Once the Enchantress left, the Prince waited until dark."}, {"speaker": "Prince 2", "text": "[Quietly] I'll use the same words she used."}, {"speaker": "Narrator 1", "text": "Stepping near the tower, he called,"}, {"speaker": "Prince 2", "text": "Rapunzel, Rapunzel, let down your hair to me!"}, {"speaker": "Narrator 2", "text": "The golden braids fell, and he climbed up carefully."}, {"speaker": "Rapunzel 2", "text": "[Gasping] Who are you? You are not the Enchantress!"}, {"speaker": "Prince 2", "text": "It's me. We made a deal, remember?"}, {"speaker": "Rapunzel 2", "text": "You could have warned me!"}, {"speaker": "Prince 2", "text": "I thought the dramatic entrance was impressive."}, {"speaker": "Rapunzel 2", "text": "It was terrifying."}, {"speaker": "Prince 2", "text": "I'll work on that."}]}, {"act": "Act 2", "scene": "Scene 3: The Journey", "lines": [{"speaker": "Narrator 3", "text": "The two began their journey through the forest."}, {"speaker": "Rapunzel 2", "text": "Everything is so different outside."}, {"speaker": "Prince 2", "text": "You have spent your whole life in a tower. Of course it looks different."}, {"speaker": "Rapunzel 2", "text": "The trees are huge."}, {"speaker": "Prince 2", "text": "Those are your first trees?"}, {"speaker": "Rapunzel 2", "text": "Don't make fun of me."}, {"speaker": "Prince 2", "text": "I'm not. I'm just surprised."}, {"speaker": "Rapunzel 2", "text": "Look! A rabbit!"}, {"speaker": "Prince 2", "text": "Yes. A rabbit."}, {"speaker": "Rapunzel 2", "text": "I have never seen one before."}, {"speaker": "Prince 2", "text": "You're going to be very busy."}, {"speaker": "Narrator 4", "text": "As they traveled, Rapunzel slowly became more confident."}, {"speaker": "Rapunzel 2", "text": "I thought the outside world would be terrifying."}, {"speaker": "Prince 2", "text": "It can be."}, {"speaker": "Rapunzel 2", "text": "But it can also be beautiful."}, {"speaker": "Prince 2", "text": "Exactly."}, {"speaker": "Narrator 5", "text": "Neither of them noticed that the Enchantress was following their trail."}, {"speaker": "Enchantress", "text": "Rapunzel thinks she can leave me?"}, {"speaker": "Enchantress", "text": "She has no idea how much I need her magic."}, {"speaker": "Narrator 1", "text": "Meanwhile, Rapunzel and the Prince continued toward the kingdom."}]}, {"act": "Act 3", "scene": "Scene 1: The Lantern Festival", "lines": [{"speaker": "Narrator 2", "text": "That evening, the kingdom celebrated the annual lantern festival."}, {"speaker": "King", "text": "Every year, we light these lanterns for our lost princess."}, {"speaker": "Woman", "text": "It has been so long since she disappeared."}, {"speaker": "Man", "text": "Do you still believe she is alive?"}, {"speaker": "King", "text": "I have never stopped believing."}, {"speaker": "Servant", "text": "Your Majesty, the lanterns are ready."}, {"speaker": "King", "text": "Then let us begin."}, {"speaker": "Narrator 3", "text": "Hundreds of lanterns filled the sky."}, {"speaker": "Rapunzel 1", "text": "I've never seen anything like this."}, {"speaker": "Prince 1", "text": "I thought you might like it."}, {"speaker": "Rapunzel 1", "text": "I don't just like it. I feel like I've been waiting for this my entire life."}, {"speaker": "Narrator 4", "text": "Rapunzel looked toward the palace."}, {"speaker": "Rapunzel 1", "text": "Why does that place feel familiar?"}, {"speaker": "Prince 1", "text": "Maybe you've seen it in a painting."}, {"speaker": "Rapunzel 1", "text": "No. It's something else."}, {"speaker": "Woman", "text": "Look at that girl."}, {"speaker": "Man", "text": "Her hair..."}, {"speaker": "King", "text": "Wait."}, {"speaker": "Narrator 5", "text": "The King noticed a symbol on Rapunzel's necklace."}, {"speaker": "King", "text": "That symbol belonged to my daughter."}, {"speaker": "Servant", "text": "Your Majesty?"}, {"speaker": "King", "text": "Could it really be her?"}]}, {"act": "Act 3", "scene": "Scene 2: The Truth", "lines": [{"speaker": "Rapunzel 1", "text": "Who are you?"}, {"speaker": "King", "text": "I am the King of this kingdom."}, {"speaker": "Rapunzel 1", "text": "Then why do I feel like I know you?"}, {"speaker": "King", "text": "Because you may be the daughter we lost."}, {"speaker": "Rapunzel 1", "text": "What?"}, {"speaker": "Narrator 1", "text": "Everything began to make sense. The tower. The Enchantress. Her magical hair."}, {"speaker": "Rapunzel 1", "text": "She told me my parents abandoned me."}, {"speaker": "King", "text": "They never did."}, {"speaker": "Rapunzel 1", "text": "Then she lied to me my whole life."}, {"speaker": "Prince 1", "text": "Rapunzel, there's something I need to tell you too."}, {"speaker": "Rapunzel 1", "text": "What?"}, {"speaker": "Prince 1", "text": "The thing I stole from the palace... I took it because I wanted to escape."}, {"speaker": "Rapunzel 1", "text": "So you lied to me?"}, {"speaker": "Prince 1", "text": "At first, yes. But everything that happened after that was real."}, {"speaker": "Rapunzel 1", "text": "I don't know what to believe."}, {"speaker": "Enchantress", "text": "You should believe me."}, {"speaker": "Rapunzel 1", "text": "You!"}, {"speaker": "Enchantress", "text": "Come with me, Rapunzel."}, {"speaker": "King", "text": "Stay away from my daughter."}, {"speaker": "Enchantress", "text": "Your daughter belongs with me."}, {"speaker": "Rapunzel 1", "text": "No. She doesn't."}, {"speaker": "Enchantress", "text": "You have no idea what your hair can do."}, {"speaker": "Rapunzel 1", "text": "I know exactly what it has done. It kept me trapped."}, {"speaker": "Narrator 2", "text": "The Enchantress grabbed Rapunzel and took her away before anyone could stop her."}, {"speaker": "King", "text": "Rapunzel!"}, {"speaker": "Prince 1", "text": "I'm going after her."}, {"speaker": "King", "text": "Then bring my daughter home."}]}, {"act": "Act 4", "scene": "Scene 1: Back to the Tower", "lines": [{"speaker": "Narrator 3", "text": "The Enchantress brought Rapunzel back to the tower."}, {"speaker": "Enchantress", "text": "You will stay here forever."}, {"speaker": "Rapunzel 2", "text": "No. I won't."}, {"speaker": "Enchantress", "text": "You need me."}, {"speaker": "Rapunzel 2", "text": "I needed someone to protect me when I was a child. That doesn't mean I need you now."}, {"speaker": "Enchantress", "text": "Without me, you have nothing."}, {"speaker": "Rapunzel 2", "text": "I have a family. I have friends. And I have a choice."}, {"speaker": "Narrator 4", "text": "The Prince arrived at the tower."}, {"speaker": "Prince 2", "text": "Rapunzel!"}, {"speaker": "Rapunzel 2", "text": "I'm here!"}, {"speaker": "Enchantress", "text": "You again."}, {"speaker": "Prince 2", "text": "You really need to stop kidnapping people."}, {"speaker": "Enchantress", "text": "You cannot defeat me."}, {"speaker": "Prince 2", "text": "Maybe not. But I don't have to defeat you alone."}, {"speaker": "Narrator 5", "text": "The Prince helped Rapunzel escape."}, {"speaker": "Rapunzel 2", "text": "Wait!"}, {"speaker": "Prince 2", "text": "What?"}, {"speaker": "Rapunzel 2", "text": "My hair. That's where her power comes from."}, {"speaker": "Prince 2", "text": "Then what are you thinking?"}, {"speaker": "Rapunzel 2", "text": "I'm ending this."}, {"speaker": "Enchantress", "text": "No! Don't touch your hair!"}, {"speaker": "Narrator 1", "text": "Rapunzel's magical hair was cut, and the Enchantress suddenly lost the power she had depended on for so many years."}, {"speaker": "Enchantress", "text": "My magic..."}, {"speaker": "Narrator 2", "text": "Without the magic, the Enchantress could no longer control Rapunzel."}]}, {"act": "Act 4", "scene": "Scene 2: Home", "lines": [{"speaker": "Narrator 3", "text": "Rapunzel returned to the kingdom with the Prince."}, {"speaker": "King", "text": "Rapunzel."}, {"speaker": "Rapunzel 2", "text": "Dad?"}, {"speaker": "King", "text": "You're home."}, {"speaker": "Woman", "text": "We have waited so long for this moment."}, {"speaker": "Man", "text": "The whole kingdom has been looking for you."}, {"speaker": "Servant", "text": "Your Majesty, everyone is waiting outside."}, {"speaker": "King", "text": "Then let them know the princess has returned."}, {"speaker": "Villager", "text": "The princess is back!"}, {"speaker": "Villager", "text": "Everyone, come and celebrate!"}, {"speaker": "Narrator 4", "text": "The kingdom filled with music and celebration."}, {"speaker": "Prince 2", "text": "So, I suppose I should return what I stole."}, {"speaker": "Rapunzel 2", "text": "I suppose you should."}, {"speaker": "Prince 2", "text": "And then?"}, {"speaker": "Rapunzel 2", "text": "Then you can stay."}, {"speaker": "Prince 2", "text": "I can live with that."}, {"speaker": "Villager", "text": "This is the best festival we've ever had!"}, {"speaker": "Servant", "text": "After everything that happened, I think we deserve a celebration."}, {"speaker": "Narrator 5", "text": "Rapunzel had spent years believing that the tower was her whole world."}, {"speaker": "Narrator 1", "text": "But she discovered that the world was much bigger."}, {"speaker": "Narrator 2", "text": "She found her family."}, {"speaker": "Narrator 3", "text": "She found friendship."}, {"speaker": "Narrator 4", "text": "And most importantly, she found the courage to choose her own future."}, {"speaker": "Rapunzel 2", "text": "I used to think freedom meant leaving the tower."}, {"speaker": "Rapunzel 2", "text": "Now I know it means being able to choose where I belong."}, {"speaker": "King", "text": "Welcome home, Rapunzel."}, {"speaker": "Narrator 5", "text": "And so, after years of waiting, the lost princess finally came home."}, {"speaker": "Villager", "text": "Long live the princess!"}, {"speaker": "Servant", "text": "And long live the lantern festival!"}, {"speaker": "Narrator 1", "text": "The lanterns rose into the sky once again."}, {"speaker": "Narrator 2", "text": "But this time, they were not a symbol of someone who was missing."}, {"speaker": "Narrator 3", "text": "They were a celebration of someone who had finally been found."}, {"speaker": "ALL", "text": "The End."}]}]};
+let role = localStorage.getItem("stageMateRole") || "Rapunzel 1", mode="learning", lineIndex=0, currentScene=0, scoreData={matches:0, attempts:0};
+const scenes = DATA.script;
+function el(id){return document.getElementById(id)}
+function show(id){["home","practice","modes","report"].forEach(x=>el(x).classList.add("hidden"));el(id).classList.remove("hidden");}
+function init(){
+ const r=el("roles");
+ const roleInfo={
+   "Rapunzel 1":["👧","長髮公主 1"],
+   "Rapunzel 2":["👧","長髮公主 2"],
+   "Prince 1":["🤴","王子 1"],
+   "Prince 2":["🤴","王子 2"],
+   "Enchantress":["🧙‍♀️","女巫"],
+   "King":["👑","國王"],
+   "Man":["👨","男士"],
+   "Woman":["👩","女士"],
+   "Villager":["🧑","村民"],
+   "Servant":["🧑‍💼","僕人"],
+   "Narrator 1":["📖","旁白 1"],
+   "Narrator 2":["📖","旁白 2"],
+   "Narrator 3":["📖","旁白 3"],
+   "Narrator 4":["📖","旁白 4"],
+   "Narrator 5":["📖","旁白 5"]
+ };
+ r.innerHTML=DATA.roles.map(x=>{
+   const info=roleInfo[x]||["🎭",x];
+   return `<button class="role ${role===x?'active':''}" onclick="chooseRole('${x}',this)">
+     <div style="font-size:25px">${info[0]}</div><b>${x}</b><span>${info[1]}</span>
+   </button>`;
+ }).join("");
+}
+function getActs(){ return [...new Set(DATA.script.map(s=>s.act))]; }
+function initSceneSelectors(){
+ const acts=getActs();
+ const actSel=el("actSelect");
+ actSel.innerHTML=acts.map((a,i)=>`<option value="${i}">${a}</option>`).join("");
+ updateSceneOptions();
+ const pAct=el("practiceActSelect");
+ if(pAct){
+   pAct.innerHTML=acts.map((a,i)=>`<option value="${i}">${a}</option>`).join("");
+   updatePracticeSceneOptions();
+ }
+}
+function updateSceneOptions(){
+ const acts=getActs();
+ const actIndex=Number(el("actSelect").value||0);
+ const actName=acts[actIndex];
+ const sceneSel=el("sceneSelect");
+ const matches=DATA.script.map((s,i)=>({s,i})).filter(x=>x.s.act===actName);
+ sceneSel.innerHTML=matches.map(x=>`<option value="${x.i}">${x.s.scene}</option>`).join("");
+}
+function updatePracticeSceneOptions(){
+ const acts=getActs();
+ const pAct=el("practiceActSelect");
+ const pScene=el("practiceSceneSelect");
+ if(!pAct||!pScene)return;
+ const actName=acts[Number(pAct.value||0)];
+ const matches=DATA.script.map((s,i)=>({s,i})).filter(x=>x.s.act===actName);
+ pScene.innerHTML=matches.map(x=>`<option value="${x.i}">${x.s.scene}</option>`).join("");
+ const desired=String(currentScene);
+ if(matches.some(x=>String(x.i)===desired)) pScene.value=desired;
+}
+function changePracticeScene(){
+ currentScene=Number(el("practiceSceneSelect").value||0);
+ lineIndex=0;
+ scoreData={matches:0,attempts:0};
+ render();
+}
+function syncPracticeSelectors(){
+ const acts=getActs(), s=scenes[currentScene];
+ const pAct=el("practiceActSelect"), pScene=el("practiceSceneSelect");
+ if(!pAct||!pScene)return;
+ const ai=acts.indexOf(s.act);
+ pAct.value=String(ai<0?0:ai);
+ updatePracticeSceneOptions();
+ pScene.value=String(currentScene);
+}
+function chooseRole(x,b){
+ role=x;
+ localStorage.setItem("stageMateRole",role);
+ document.querySelectorAll(".role").forEach(q=>q.classList.remove("active"));
+ b.classList.add("active");
+ el("selectedRole").textContent="You are · "+role;
+ render();
+}
+function isMyRole(speaker){
+ return speaker===role;
+}
+function startPractice(){
+ const selected = Number(el("sceneSelect").value || 0);
+ currentScene = selected;
+ lineIndex = 0;
+ scoreData={matches:0,attempts:0};
+ show("practice");
+ syncPracticeSelectors();
+ render();
+}
+function setMode(m){mode=m;show("practice");render();}
+function render(){
+ if(el("selectedRole")) el("selectedRole").textContent="You are · "+role;
+ syncPracticeSelectors();
+ const s=scenes[currentScene];
+ el("sceneTitle").textContent=s.act+" · "+s.scene;
+ el("bar").style.width=((lineIndex+1)/s.lines.length*100)+"%";
+ const box=el("dialogue"); box.innerHTML="";
+ const cur=s.lines[lineIndex];
+
+ // Show a short conversation history, then the current turn.
+ const start=Math.max(0,lineIndex-3);
+ const end=Math.min(s.lines.length,lineIndex+1);
+
+ for(let i=start;i<end;i++){
+   const l=s.lines[i], mine=isMyRole(l.speaker);
+   const d=document.createElement("div");
+   d.className="bubble "+(mine?"you":"ai");
+   const avatar=mine?'<span class="youAvatar">🎭</span>':'<span class="aiAvatar">🤖</span>';
+   const label=mine?"You · "+role:l.speaker;
+   const isCurrent=i===lineIndex;
+   let text=l.text;
+
+   if(isCurrent && mine && (mode==="rehearsal"||mode==="performance")){
+      text="Your turn — speak your line";
+   }
+   d.innerHTML=`<div class="speaker">${avatar}${label}${isCurrent?'<span class="turnBadge">YOUR TURN</span>':''}</div>
+   <div class="lineText">${text}</div>
+   <div class="translation">${translate(text==="Your turn — speak your line"?l.text:text)}</div>`;
+   box.appendChild(d);
+ }
+
+ if(cur && !isMyRole(cur.speaker)){
+   el("turnHint").innerHTML="🤖 AI 對手正在說台詞……<br><span class='small'>聽完後，輪到你回應。</span>";
+   setTimeout(()=>speak(cur.text,cur.speaker),250);
+ } else if(cur){
+   el("turnHint").innerHTML="🎭 <b>輪到你！</b><br><span class='small'>看上方小字提示，然後說出你的台詞。</span>";
+ }
+}
+const TRANSLATIONS={"Long ago, a king and queen had a daughter named Rapunzel. Before she was born, the queen became seriously ill.": "很久以前，一位國王和王后有一個名叫長髮公主的女兒。在她出生之前，王后病得非常嚴重。", "Nearby, there was a magical golden flower. It had the power to heal people and keep them young.": "附近有一朵神奇的金色花朵。它擁有治癒人們並讓人保持年輕的力量。", "Please, find that flower. We will do anything to save the queen and our child.": "請找到那朵花。我們願意做任何事來拯救王后和我們的孩子。", "Your Majesty, the flower has been found!": "陛下，那朵花找到了！", "The queen is getting better!": "王后的病情好轉了！", "The magic of the flower saved the queen. But when Rapunzel was born, its magic passed into her golden hair.": "花朵的魔法救了王后。但長髮公主出生時，花朵的魔力傳到了她的金色頭髮裡。", "Our daughter is healthy. We are so lucky.": "我們的女兒很健康。我們真幸運。", "Look at her hair. It almost seems to glow.": "看看她的頭髮。好像會發光一樣。", "But someone else had noticed the magic.": "但還有另一個人注意到了這股魔力。", "That child has the power of the flower. If I can use her hair, I can stay young forever.": "那個孩子擁有花朵的力量。如果我能利用她的頭髮，我就能永遠保持年輕。", "That night, the Enchantress entered the palace and took the baby away.": "那天晚上，女巫進入皇宮，把嬰兒帶走了。", "Rapunzel! Where is my daughter?": "長髮公主！我的女兒在哪裡？", "Your Majesty, we have searched everywhere. She is gone.": "陛下，我們到處都找過了。她不見了。", "Find her. We cannot give up.": "找到她。我們不能放棄。", "The kingdom searched for years, but Rapunzel was never found.": "王國尋找了很多年，但始終沒有找到長髮公主。", "Rapunzel grew up in a tall tower hidden deep in the forest. She had never seen the outside world.": "長髮公主在森林深處一座高塔中長大。她從來沒有看過外面的世界。", "Every year, on my birthday, those lights appear in the sky. I don't know what they are, but I want to see them for myself.": "每年生日，那些燈都會出現在天空中。我不知道它們是什麼，但我想親眼看看。", "Rapunzel, you are not leaving this tower.": "長髮公主，你不能離開這座高塔。", "Why not?": "為什麼？", "The outside world is dangerous. You are safer here with me.": "外面的世界很危險。你跟我待在這裡比較安全。", "You always say that. I can take care of myself.": "你總是這麼說。我可以照顧自己。", "You have no idea what is out there.": "你根本不知道外面的世界是什麼樣子。", "Rapunzel, let down your hair.": "長髮公主，把你的頭髮放下來。", "Coming!": "來了！", "Rapunzel's long hair reached all the way to the ground, allowing the Enchantress to climb into the tower.": "長髮公主的長髮一直垂到地面，讓女巫可以順著頭髮爬進高塔。", "I really want to see the lanterns this year.": "今年我真的很想去看那些燈籠。", "Forget the lanterns. Stay here.": "別想那些燈籠了。待在這裡。", "I won't be a child forever.": "我不會永遠都是個孩子。", "But Rapunzel's wish was about to come true in a way she never expected.": "但長髮公主的願望即將以她從未想過的方式實現。", "Not far away, a young prince was running from the palace.": "不遠處，一位年輕王子正從皇宮逃跑。", "I may have borrowed something from the palace without permission, but I had a very good reason.": "我可能沒經過允許就從皇宮拿了些東西，但我有一個非常好的理由。", "His reason was not particularly convincing. Still, he needed somewhere to hide.": "他的理由並不太有說服力。不過，他需要一個藏身之處。", "That tower will do.": "那座塔就可以。", "He climbed the tower and entered through the window.": "他爬上高塔，從窗戶進去了。", "Who are you?!": "你是誰？！", "Please don't scream.": "請不要尖叫。", "You broke into my home!": "你闖進了我家！", "Technically, I climbed into your home.": "嚴格來說，我是爬進你家的。", "That is not better.": "這樣並沒有比較好。", "Fair point.": "說得有道理。", "Rapunzel noticed that he was carrying something.": "長髮公主注意到他帶著某樣東西。", "What's that?": "那是什麼？", "Nothing.": "沒什麼。", "You are terrible at lying.": "你真的很不會說謊。", "I need somewhere to hide, and you need someone to take you to the lantern festival.": "我需要一個藏身的地方，而你需要有人帶你去看燈籠節。", "How do you know about the festival?": "你怎麼知道燈籠節？", "Everyone knows about it.": "大家都知道。", "Then take me.": "那就帶我去。", "And what do I get?": "那我能得到什麼？", "You get your stolen item back. I hid it.": "你可以拿回你偷來的東西。我把它藏起來了。", "You what?": "你什麼？", "Take me to the lanterns, and I'll return it.": "帶我去看燈籠，我就把它還給你。", "Deal.": "成交。", "For the first time, Rapunzel was going to leave the tower.": "第一次，長髮公主即將離開高塔。", "The next morning, Rapunzel prepared to leave.": "第二天早上，長髮公主準備離開。", "I'm leaving. I'm actually leaving.": "我要走了。我真的要離開了。", "You have said that about ten times.": "你已經說了大概十遍了。", "Because I'm excited.": "因為我太興奮了。", "I noticed.": "我看得出來。", "Rapunzel looked back at the tower.": "長髮公主回頭看著高塔。", "I have spent my whole life here. Part of me is scared.": "我一輩子都住在這裡。我有一部分其實很害怕。", "That's normal.": "這很正常。", "And the other part of me wants to run into the forest screaming.": "而我的另一部分卻想尖叫著跑進森林。", "That sounds less normal.": "聽起來就沒那麼正常了。", "Let's go.": "我們走吧。", "The Prince realized Rapunzel's hair was the ladder.": "王子發現長髮公主的頭髮就是那座梯子。", "If she can pull up the Enchantress, perhaps she can pull me up as well.": "如果她能把女巫拉上去，也許她也能把我拉上去。", "Once the Enchantress left, the Prince waited until dark.": "女巫離開後，王子一直等到天黑。", "[Quietly] I'll use the same words she used.": "【輕聲地】我要用她說過的同樣的話。", "Stepping near the tower, he called,": "走到高塔附近，他喊道：", "Rapunzel, Rapunzel, let down your hair to me!": "長髮公主，長髮公主，把你的頭髮放下來！", "The golden braids fell, and he climbed up carefully.": "金色的辮子垂了下來，他小心地爬了上去。", "[Gasping] Who are you? You are not the Enchantress!": "【喘氣】你是誰？你不是女巫！", "It's me. We made a deal, remember?": "是我。我們說好了，記得嗎？", "You could have warned me!": "你本來可以先告訴我的！", "I thought the dramatic entrance was impressive.": "我以為這樣戲劇性的登場很帥。", "It was terrifying.": "那很嚇人。", "I'll work on that.": "我會改進的。", "The two began their journey through the forest.": "兩人開始穿越森林的旅程。", "Everything is so different outside.": "外面的世界完全不一樣。", "You have spent your whole life in a tower. Of course it looks different.": "你一輩子都住在高塔裡。當然會覺得不一樣。", "The trees are huge.": "樹好大。", "Those are your first trees?": "那些是你第一次看到的樹？", "Don't make fun of me.": "不要取笑我。", "I'm not. I'm just surprised.": "我沒有。我只是很驚訝。", "Look! A rabbit!": "看！一隻兔子！", "Yes. A rabbit.": "對，一隻兔子。", "I have never seen one before.": "我以前從沒看過。", "You're going to be very busy.": "你接下來會忙得很。", "As they traveled, Rapunzel slowly became more confident.": "旅途中，長髮公主慢慢變得更有自信。", "I thought the outside world would be terrifying.": "我原本以為外面的世界會很可怕。", "It can be.": "有時候確實會。", "But it can also be beautiful.": "但它也可以很美。", "Exactly.": "沒錯。", "Neither of them noticed that the Enchantress was following their trail.": "他們都沒有注意到女巫正在跟蹤他們。", "Rapunzel thinks she can leave me?": "長髮公主以為她可以離開我？", "She has no idea how much I need her magic.": "她根本不知道我有多需要她的魔力。", "Meanwhile, Rapunzel and the Prince continued toward the kingdom.": "與此同時，長髮公主和王子繼續朝王國前進。", "That evening, the kingdom celebrated the annual lantern festival.": "那天晚上，王國舉行一年一度的燈籠節。", "Every year, we light these lanterns for our lost princess.": "每年，我們都為失蹤的公主點亮這些燈籠。", "It has been so long since she disappeared.": "她失蹤已經這麼久了。", "Do you still believe she is alive?": "你仍然相信她還活著嗎？", "I have never stopped believing.": "我從未停止相信。", "Your Majesty, the lanterns are ready.": "陛下，燈籠都準備好了。", "Then let us begin.": "那我們就開始吧。", "Hundreds of lanterns filled the sky.": "數百盞燈籠照亮了天空。", "I've never seen anything like this.": "我從沒看過這麼美的景象。", "I thought you might like it.": "我就猜到你會喜歡。", "I don't just like it. I feel like I've been waiting for this my entire life.": "我不只是喜歡。我覺得自己一生都在等待這一刻。", "Rapunzel looked toward the palace.": "長髮公主望向皇宮。", "Why does that place feel familiar?": "為什麼那個地方讓我覺得很熟悉？", "Maybe you've seen it in a painting.": "也許你曾在畫裡看過。", "No. It's something else.": "不，不是。是別的原因。", "Look at that girl.": "看看那個女孩。", "Her hair...": "她的頭髮……", "Wait.": "等等。", "The King noticed a symbol on Rapunzel's necklace.": "國王注意到了長髮公主項鍊上的一個標誌。", "That symbol belonged to my daughter.": "那個標誌是我女兒的。", "Your Majesty?": "陛下？", "Could it really be her?": "難道真的是她？", "Who are you?": "你是誰？", "I am the King of this kingdom.": "我是這個王國的國王。", "Then why do I feel like I know you?": "那為什麼我覺得我好像認識你？", "Because you may be the daughter we lost.": "因為你可能就是我們失去的女兒。", "What?": "什麼？", "Everything began to make sense. The tower. The Enchantress. Her magical hair.": "一切開始變得合理了。高塔、女巫，還有她的魔法頭髮。", "She told me my parents abandoned me.": "她告訴我，我的父母拋棄了我。", "They never did.": "他們從來沒有。", "Then she lied to me my whole life.": "那她騙了我一輩子。", "Rapunzel, there's something I need to tell you too.": "長髮公主，我也有件事要告訴你。", "The thing I stole from the palace... I took it because I wanted to escape.": "我從皇宮偷的那件東西……我是因為想逃走才拿的。", "So you lied to me?": "所以你騙了我？", "At first, yes. But everything that happened after that was real.": "一開始，是的。但後來發生的一切都是真的。", "I don't know what to believe.": "我不知道該相信什麼。", "You should believe me.": "你應該相信我。", "Come with me, Rapunzel.": "跟我走，長髮公主。", "Stay away from my daughter.": "離我的女兒遠一點。", "Your daughter belongs with me.": "你的女兒應該跟我在一起。", "No. She doesn't.": "不，她不屬於你。", "You have no idea what your hair can do.": "你根本不知道你的頭髮有什麼力量。", "I know exactly what it has done. It kept me trapped.": "我很清楚它做了什麼。它讓我一直被困住。", "The Enchantress grabbed Rapunzel and took her away before anyone could stop her.": "女巫抓住長髮公主，在任何人阻止她之前把她帶走了。", "Rapunzel!": "長髮公主！", "I'm going after her.": "我要去追她。", "Then bring my daughter home.": "那就把我的女兒帶回家。", "The Enchantress brought Rapunzel back to the tower.": "女巫把長髮公主帶回高塔。", "You will stay here forever.": "你要永遠待在這裡。", "No. I won't.": "不，我不會。", "You need me.": "你需要我。", "I needed someone to protect me when I was a child. That doesn't mean I need you now.": "我小時候需要有人保護我。但那不代表我現在還需要你。", "Without me, you have nothing.": "沒有我，你什麼都沒有。", "I have a family. I have friends. And I have a choice.": "我有家人。我有朋友。而且我有選擇的權利。", "The Prince arrived at the tower.": "王子來到了高塔。", "I'm here!": "我在這裡！", "You again.": "又是你。", "You really need to stop kidnapping people.": "你真的該停止綁架別人了。", "You cannot defeat me.": "你不可能打敗我。", "Maybe not. But I don't have to defeat you alone.": "也許吧。但我不需要一個人打敗你。", "The Prince helped Rapunzel escape.": "王子幫助長髮公主逃走。", "Wait!": "等等！", "My hair. That's where her power comes from.": "我的頭髮。她的力量就是來自這裡。", "Then what are you thinking?": "那你打算怎麼做？", "I'm ending this.": "我要結束這一切。", "No! Don't touch your hair!": "不！不要碰你的頭髮！", "Rapunzel's magical hair was cut, and the Enchantress suddenly lost the power she had depended on for so many years.": "長髮公主的魔法頭髮被剪掉了，女巫突然失去了多年來一直依靠的力量。", "My magic...": "我的魔力……", "Without the magic, the Enchantress could no longer control Rapunzel.": "沒有魔法，女巫再也無法控制長髮公主。", "Rapunzel.": "長髮公主。", "Dad?": "爸爸？", "You're home.": "你回家了。", "We have waited so long for this moment.": "我們等這一刻等了好久。", "The whole kingdom has been looking for you.": "整個王國一直都在找你。", "Your Majesty, everyone is waiting outside.": "陛下，所有人都在外面等著。", "Then let them know the princess has returned.": "那就告訴大家，公主回來了。", "The princess is back!": "公主回來了！", "Everyone, come and celebrate!": "大家快來慶祝！", "The kingdom filled with music and celebration.": "王國充滿了音樂與歡樂。", "So, I suppose I should return what I stole.": "所以，我想我應該把偷來的東西還回去。", "I suppose you should.": "我想你應該還回去。", "And then?": "然後呢？", "Then you can stay.": "然後你可以留下來。", "I can live with that.": "我可以接受。", "This is the best festival we've ever had!": "這是我們參加過最棒的節日！", "After everything that happened, I think we deserve a celebration.": "經歷了這麼多事情，我想我們值得好好慶祝一下。", "Rapunzel had spent years believing that the tower was her whole world.": "多年來，長髮公主一直以為高塔就是她的全世界。", "But she discovered that the world was much bigger.": "但她發現世界比她想像的更大。", "She found her family.": "她找到了自己的家人。", "She found friendship.": "她找到了友誼。", "And most importantly, she found the courage to choose her own future.": "更重要的是，她找到了選擇自己未來的勇氣。", "I used to think freedom meant leaving the tower.": "我以前以為自由就是離開高塔。", "Now I know it means being able to choose where I belong.": "現在我知道，自由是能夠選擇自己屬於哪裡。", "Welcome home, Rapunzel.": "歡迎回家，長髮公主。", "And so, after years of waiting, the lost princess finally came home.": "就這樣，經過多年的等待，失蹤的公主終於回家了。", "Long live the princess!": "公主萬歲！", "And long live the lantern festival!": "燈籠節萬歲！", "The lanterns rose into the sky once again.": "燈籠再次升上天空。", "But this time, they were not a symbol of someone who was missing.": "但這一次，它們不再象徵一個失蹤的人。", "They were a celebration of someone who had finally been found.": "它們是在慶祝一個終於被找到的人。", "The End.": "劇終。"};
+function translate(t){
+ return TRANSLATIONS[t]||"";
+}
+function pickVoiceForSpeaker(speaker){
+ if(!("speechSynthesis" in window)) return null;
+ const voices=speechSynthesis.getVoices().filter(v=>/^en(-|_)/i.test(v.lang));
+ if(!voices.length)return null;
+ const youngFemale=/Rapunzel [12]/.test(speaker);
+ const olderFemale=/^Enchantress$|^Woman$/.test(speaker);
+ const femaleNames=/samantha|victoria|karen|moira|tessa|zira|susan|ava|allison|aria|jenny|libby|hazel|siri|female/i;
+ const female=voices.filter(v=>femaleNames.test(v.name));
+ if(youngFemale){
+   return female.find(v=>/samantha|ava|aria|jenny|siri/i.test(v.name))||female[0]||voices.find(v=>/en-US|en-GB/i.test(v.lang))||voices[0];
+ }
+ if(olderFemale){
+   return female.find(v=>/karen|moira|victoria|susan|hazel/i.test(v.name))||female[0]||voices.find(v=>/en-US|en-GB/i.test(v.lang))||voices[0];
+ }
+ return voices.find(v=>/en-US|en-GB/i.test(v.lang))||voices[0];
+}
+function emotionFor(text,speaker){
+ const t=text.toLowerCase();
+ if(/\[gasping\]|!\s*$|who are you|don't|no!|stay away|you cannot|cannot defeat|stop|danger|terrifying|scared|afraid|help/.test(t)) return "high";
+ if(/\[quietly\]|secret|whisper|mysterious|wait\.?$|i don't know|i don't understand/.test(t)) return "quiet";
+ if(/i'm leaving|actually leaving|excited|beautiful|celebrate|best festival|welcome home|long live|love|lucky/.test(t)) return "bright";
+ if(/family|parents|daughter|dad\?|home|never stopped believing|waited so long|lost|alone|lied to me|whole life|goodbye/.test(t)) return "tender";
+ if(/lied|kidnapping|kidnap|my daughter|you need me|without me|trapped|forever|belongs with me|my magic|power|defeat/.test(t)) return "dark";
+ if(/deal|fair point|technically|that's not better|i noticed|i thought|sounds less normal|rabbit|very busy/.test(t)) return "playful";
+ if(/exactly|i'm ending this|i have a choice|let's go|then take me|i can take care of myself|i won't|i have a family|i know/.test(t)) return "strong";
+ return "neutral";
+}
+function expressiveText(text,emotion){
+ let out=text.replace(/^\[[^\]]+\]\s*/,'');
+ out=out.replace(/\s*—\s*/g,' ... ');
+ if(emotion==="quiet" && !/[.!?…]$/.test(out)) out+=' ...';
+ if(emotion==="high" && out.length<42 && !/[!?]$/.test(out)) out+='!';
+ return out;
+}
+function speak(text,speaker=""){
+ if(!("speechSynthesis" in window))return;
+ speechSynthesis.cancel();
+ const emotion=emotionFor(text,speaker);
+ const u=new SpeechSynthesisUtterance(expressiveText(text,emotion));
+ u.lang="en-US";
+ const youngFemale=/Rapunzel [12]/.test(speaker);
+ const olderFemale=/^Enchantress$|^Woman$/.test(speaker);
+ let rate=.9,pitch=.96;
+ if(youngFemale){rate=1.05;pitch=1.30;}
+ else if(olderFemale){rate=.80;pitch=.80;}
+ const styles={
+   high:[1.03,1.16], quiet:[.78,1.04], bright:[1.06,1.10], tender:[.84,1.03],
+   dark:[.78,.82], playful:[1.08,1.08], strong:[.96,1.05], neutral:[.90,.96]
+ };
+ const [er,ep]=styles[emotion]||styles.neutral;
+ rate*=er; pitch*=ep;
+ if(youngFemale){
+   pitch=Math.min(1.48,pitch); rate=Math.min(1.16,rate);
+ }
+ if(olderFemale){
+   pitch=Math.max(.68,pitch); rate=Math.max(.68,rate);
+ }
+ u.rate=rate;u.pitch=pitch;u.volume=1;
+ const voice=pickVoiceForSpeaker(speaker); if(voice)u.voice=voice;
+ speechSynthesis.speak(u);
+}
+function speakCurrent(){const s=scenes[currentScene],l=s.lines[lineIndex]; if(l)speak(l.text,l.speaker)}
+function repeatAI(){speakCurrent()}
+function nextLine(){const s=scenes[currentScene]; if(lineIndex<s.lines.length-1){lineIndex++;render();}else if(currentScene<scenes.length-1){currentScene++;lineIndex=0;render();}else{finish();}}
+function finish(){const base=Math.min(99,Math.max(82,Math.round(88+Math.random()*9)));el("score").textContent=base+"%";["m1","m2","m3"].forEach((id,i)=>{const v=base-(i*3);el(id).style.width=v+"%";el("p"+(i+1)).textContent=v+"%";});show("report");}
+let recognition=null;
+function toggleListen(){
+ if(!("webkitSpeechRecognition" in window)&&!("SpeechRecognition" in window)){alert("此瀏覽器未開啟語音辨識。請用 iPhone Safari/Chrome 的 HTTPS 網頁版本。");return;}
+ if(recognition){recognition.stop();return;}
+ const R=window.SpeechRecognition||window.webkitSpeechRecognition; recognition=new R();recognition.lang="en-US";recognition.interimResults=false;recognition.maxAlternatives=1;
+ el("mic").classList.add("listening");el("micText").textContent="Listening… 回應你的對手";
+ recognition.onresult=e=>{const said=e.results[0][0].transcript; const target=scenes[currentScene].lines[lineIndex].text; const a=normalize(said),b=normalize(target);const sim=similarity(a,b);scoreData.attempts++;if(sim>=.72)scoreData.matches++;el("micText").textContent=(sim>=.72?"✓ Great! ":"Try again · ")+said; if(sim>=.72)setTimeout(nextLine,700);};
+ recognition.onerror=()=>{el("micText").textContent="沒有聽清楚，再試一次";};
+ recognition.onend=()=>{el("mic").classList.remove("listening");recognition=null};
+ recognition.start();
+}
+function normalize(s){return s.toLowerCase().replace(/[^a-z0-9' ]/g,"").replace(/\s+/g," ").trim()}
+function similarity(a,b){const A=new Set(a.split(" ")),B=new Set(b.split(" "));let inter=0;A.forEach(x=>{if(B.has(x))inter++});return inter/Math.max(A.size,B.size,1)}
+init();
+initSceneSelectors();
+</script>
+</body></html>
