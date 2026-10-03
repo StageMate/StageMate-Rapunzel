@@ -38,6 +38,7 @@ header{padding:18px 20px 12px;display:flex;align-items:center;justify-content:sp
 </style>
 </head>
 <body>
+<div id="localTestBanner" style="position:sticky;top:0;z-index:9999;background:#fff3cd;color:#6b4f00;padding:7px 12px;text-align:center;font:600 13px -apple-system,BlinkMacSystemFont,sans-serif">LOCAL TEST · 本機測試版（JavaScript 已啟用才會正常互動）</div>
 <div class="app">
 <header><div class="brand"><div class="logo">🎭</div><div><h1>StageMate</h1><div class="small">Your AI Acting Partner</div></div></div><button class="secondary" onclick="speakCurrent()" title="Read aloud">🔊</button></header>
 <main>
@@ -175,6 +176,60 @@ function chooseRole(x,b){
  document.querySelectorAll(".role").forEach(q=>q.classList.remove("active"));
  b.classList.add("active");
  el("selectedRole").textContent="You are · "+role;
+
+ // Choose a role on the first page -> go straight to Practice.
+ // Start from the selected Act / Scene and find this role's first line.
+ // If the role has no line in the rest of this Act, move to the next Act.
+ // If we are already in the last Act and there is no line, start from the
+ // beginning of that last Act so the child can still follow the scene.
+ const selectedScene=Number(el("sceneSelect")?.value || 0);
+ const selectedAct=scenes[selectedScene]?.act;
+ const acts=getActs();
+ let startScene=selectedScene;
+ let foundScene=-1, foundLine=-1;
+
+ // Search the selected Act from the selected Scene forward.
+ for(let i=startScene;i<scenes.length;i++){
+   if(scenes[i].act!==selectedAct) break;
+   const li=scenes[i].lines.findIndex(l=>l.speaker===role);
+   if(li>=0){ foundScene=i; foundLine=li; break; }
+ }
+
+ // If this Act has no remaining line for the role, go to the next Act.
+ if(foundScene<0){
+   const actIndex=acts.indexOf(selectedAct);
+   if(actIndex>=0 && actIndex<acts.length-1){
+     const nextAct=acts[actIndex+1];
+     for(let i=0;i<scenes.length;i++){
+       if(scenes[i].act!==nextAct) continue;
+       const li=scenes[i].lines.findIndex(l=>l.speaker===role);
+       if(li>=0){ foundScene=i; foundLine=li; break; }
+     }
+     // If the next Act also has no line, keep moving forward until one is found.
+     for(let ai=actIndex+2;foundScene<0 && ai<acts.length;ai++){
+       const a=acts[ai];
+       for(let i=0;i<scenes.length;i++){
+         if(scenes[i].act!==a) continue;
+         const li=scenes[i].lines.findIndex(l=>l.speaker===role);
+         if(li>=0){ foundScene=i; foundLine=li; break; }
+       }
+     }
+   }
+ }
+
+ // Last Act (or no later Act contains this role): start from the head of
+ // the current/last Act instead of leaving the child without practice.
+ if(foundScene<0){
+   const fallbackAct=acts[acts.length-1];
+   foundScene=scenes.findIndex(s=>s.act===fallbackAct);
+   foundLine=0;
+ }
+
+ currentScene=Math.max(0,foundScene);
+ lineIndex=Math.max(0,foundLine);
+ scoreData={matches:0,attempts:0};
+ show("practice");
+ syncPracticeSelectors();
  render();
 }
 function isMyRole(speaker){
